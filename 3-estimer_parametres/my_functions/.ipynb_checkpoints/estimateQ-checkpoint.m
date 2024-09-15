@@ -7,8 +7,11 @@ alpha = params(2);
 
 % read in the specifics of the task
 ntrials = size(ch,1); % we read in the choices of the participant
+
+
 % define initial value
 Q0  = [0 0]; 
+
 
 % initialise the model variable
 PA = NaN(ntrials,1);
@@ -51,7 +54,6 @@ end
 
 % calculer à quel point les choix du participants étaient probables
 % avec ces parametres du modèle
-nLL(a,b) = -sum(log(lik(:)));
-
+nLL = -sum(log(lik(:)));
 
 end

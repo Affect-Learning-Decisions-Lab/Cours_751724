@@ -97,6 +97,7 @@ est_temp = temp_mat(J);
 
 figure
 
+
 imagesc(flipud(nLL))
 hold on
 xlabel('inverse temperature')
@@ -116,7 +117,8 @@ set(gca,'XLim',[1 length(temp_mat)],...
     'YTickLabel',fliplr(ytl))
 
 
-colorbar
+cb= colorbar();
+ylabel(cb,'nLL','FontSize',14)
 
 
 [I,J] = find(nLL == min(min(nLL)));
@@ -131,5 +133,7 @@ plot(J,length(alpha_mat)-I,'o',...
 
 
 
+c = jet(50);
+colormap(c);
 
 end
