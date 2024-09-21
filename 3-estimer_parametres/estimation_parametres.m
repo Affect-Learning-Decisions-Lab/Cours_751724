@@ -6,8 +6,8 @@ addpath(genpath(fullfile(here,'my_functions')));
 
 %% define the caracteristics of the task
 
-ntrials =  24;
-nruns   =  50;
+ntrials =  40;
+nruns   =  10;
 
 %% first we need to simulate some data (because we do not have real one)
 sim_alpha    = 0.3;
