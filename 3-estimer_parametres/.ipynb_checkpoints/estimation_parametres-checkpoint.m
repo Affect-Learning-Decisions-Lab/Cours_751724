@@ -1,34 +1,33 @@
 
-%% add our tools
+%% Ajouter les outils (modèle et fonctions)
 here = pwd;
 addpath(genpath(fullfile(here,'my_models')));
 addpath(genpath(fullfile(here,'my_functions')));
 
-%% define the caracteristics of the task
+%% Définir les caractéristiques de la tâche
+ntrials =  40;
+nruns   =  10;
 
-ntrials =  24;
-nruns   =  50;
-
-%% first we need to simulate some data (because we do not have real one)
+%% D'abord, nous devons simuler des données (car nous n'avons pas de vraies données)
 sim_alpha    = 0.3;
 sim_inv_temp = 1.5;
 
 [sim_ch, sim_r] = Qmodel (sim_alpha, sim_inv_temp, ntrials, nruns);
 
 
-%% second we test if our parameter estimation process finds the same results
+%% Ensuite, nous testons si le processus d'estimation des paramètres retrouve les mêmes résultats
 
-% here we test with a full grid search
+% Test avec un grid search
 [est_alpha, est_temp] = estimateQ_gridsearch(sim_ch, sim_r, nruns);
 
 
-% here we test with an optimization function
-x0 = [3 0.1]; % initial point of the exploration 5 temp and 0.5 alpha
-xmin = [0 0]; % min values of each parameter
-xmax = [5 1]; % max value of each parameter
+% Test avec une fonction d'optimisation
+x0 = [3 0.1]; % point initial : la première valeur correspond à la température, la deuxième valeur correspond à alpha
+xmin = [0 0]; % valeurs minimales pour chaque paramètre : la première valeur correspond à la température, la deuxième valeur correspond à alpha
+xmax = [5 1]; % valeurs maximales pour chaque paramètre : la première valeur correspond à la température, la deuxième valeur correspond à alpha
 
-% we define the options of the optimization function 
-options = optimset('Algorithm', 'interior-point', 'Display', 'iter-detailed', 'MaxIter', 10000); % These increase the number of iterations to ensure the convergence
+% On définit les options de la fonction d'optimisation 
+options = optimset('Algorithm', 'interior-point', 'Display', 'iter-detailed', 'MaxIter', 10000); % Ces valeurs augmentent le nombre d'itérations pour s'assurer d'avoir une convergence
 
 
 [parameters,nll,~,~,~]       = fmincon(@(x) estimateQ(x,sim_ch,sim_r, nruns),x0,[],[],[],[],xmin,xmax,[],options);

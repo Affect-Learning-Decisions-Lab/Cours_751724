@@ -1,55 +1,55 @@
 function [est_alpha, est_temp] = estimateQ_gridsearch(ch, r, nruns)
 
 
-%% define caracteristics of the task
+%% définir les caractéristiques de la tâche
 
-% define initial value
+% définir la valeur initiale
 Q0  = [0 0]; 
 
-% n trials
-ntrials = size(ch,1); % we read in the choices of the participant
+% nombre d'essais
+ntrials = size(ch,1); % on détermine le nombre d'essais à partir du nombre de choix du participant
 
 
 
-%%  Define space we want to explore
+%%  Définir l'espace que l'on veut explorer
 
-% learning rate, varies from 0 to 1 with 201 steps
+% taux d'apprentissage alpha varie entre 0 et 1 avec 201 étapes
 alpha_mat = linspace(0,1, 501);
 
-% inverse temperature varies from 0 to 5 with 201 steps
+% température inverse varie entre 0 et 1 avec 201 étapes
 temp_mat  = linspace(0, 5, 501);
 
-% initialize the likelihood matrix for each combination of parameters
+% initialiser la matrice de vraisemblance pour chaque combinaison de paramètres
 nLL = NaN(numel(alpha_mat),numel(temp_mat));
 
 
-%% explore 
+%% explorer 
 
-% let's start exploring the likelyhoold of the choices with all possible
-% combination
+% commençons par explorer la vraisemblance des choix avec toutes les
+% combinaisons possibles
 
 for a = 1:size(alpha_mat,2)
 
-    alpha = alpha_mat(a); % select one possible learning rate value
+    alpha = alpha_mat(a); % sélectionner une valeur possible du taux d'apprentissage
 
     for b = 1:size(temp_mat,2)
 
-        inv_temp = temp_mat(b); % select one possible temperature value
+        inv_temp = temp_mat(b); % sélectionner une valeur possible de température
 
 
-        % initialise model variables
+        % initialiser les variables du modèle
         PA = NaN(ntrials,1);
         lik = NaN(ntrials,1);
         Qt = NaN(ntrials,2);
         PE = NaN(ntrials,1);
 
-        %value before learning start
+        % valeur avant le début de l'apprentissage
         Qt(1,:)  = Q0;
 
         for t = 1:ntrials
 
             if  mod(t,(ntrials/nruns)) == 0
-                % initialize value for each run
+                % initialiser la valeur pour chaque série
                 Qt(t,:)  = Q0;
             end
 
@@ -59,19 +59,19 @@ for a = 1:size(alpha_mat,2)
             % voir à quel point le choix du modèle correspond au choix du
             % participant
 
-            if ch(t) == 1 % si le participants a choisit B
+            if ch(t) == 1 % si le participants a choisi B
                 lik(t) = 1 - PA(t);
-            elseif ch(t) == 2 % si le particiapnts a choisit A
+            elseif ch(t) == 2 % si le particiapnts a choisi A
                 lik(t) = PA(t);
             end
 
             % calculer l'erreur de prédiction sur la base de la récompense
-            % délivré au participant (r)
+            % délivrée au participant (r)
             PE(t) = r(t) - Qt(t,ch(t));
 
-            % update value
-            Qt(t+1,ch(t)) = Qt(t,ch(t)) + alpha.*PE(t);     % column ch(t) = chosen (1 or 2)
-            Qt(t+1,3-ch(t)) = Qt(t,3-ch(t));                % column 3-ch(t) = unchosen (2 or 1)
+            % mise à jour de la valeur
+            Qt(t+1,ch(t)) = Qt(t,ch(t)) + alpha.*PE(t);     % colonne ch(t) = choisie (1 ou 2)
+            Qt(t+1,3-ch(t)) = Qt(t,3-ch(t));                % colonne 3-ch(t) = non choisie (2 ou 1)
 
 
         end
@@ -81,19 +81,19 @@ for a = 1:size(alpha_mat,2)
         nLL(a,b) = -sum(log(lik(:)));
 
 
-    end % end temp
+    end % fin température
 
-end % end learning rate
+end % fin taux d'apprentissage
 
 
-% get estimated alpha and temp
+% obtenir les valeurs de alpha et de la température estimées
 
 [I,J] = find(nLL == min(min(nLL)));
 
 est_alpha = alpha_mat(I);
 est_temp = temp_mat(J);
 
-%% plot grid search results
+%% plot des résultats du grid search
 
 figure
 
