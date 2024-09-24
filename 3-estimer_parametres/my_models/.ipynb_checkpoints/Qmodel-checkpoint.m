@@ -46,10 +46,10 @@ for krun = 1:nruns
 
 end
 
-% concatener le vecteur avec le choix
+% concaténer le vecteur avec le choix
 ch_all = ch(:);
 
-% concatener le vecteur avec la récompense
+% concaténer le vecteur avec la récompense
 r_all = r(:);
 
 end

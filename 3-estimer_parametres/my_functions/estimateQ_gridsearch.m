@@ -13,10 +13,10 @@ ntrials = size(ch,1); % on détermine le nombre d'essais à partir du nombre de 
 
 %%  Définir l'espace que l'on veut explorer
 
-% taux d'apprentissage alpha varie entre 0 et 1 avec 201 étapes
+% taux d'apprentissage alpha varie entre 0 et 1 avec 501 étapes
 alpha_mat = linspace(0,1, 501);
 
-% température inverse varie entre 0 et 1 avec 201 étapes
+% température inverse varie entre 0 et 1 avec 501 étapes
 temp_mat  = linspace(0, 5, 501);
 
 % initialiser la matrice de vraisemblance pour chaque combinaison de paramètres
@@ -59,9 +59,9 @@ for a = 1:size(alpha_mat,2)
             % voir à quel point le choix du modèle correspond au choix du
             % participant
 
-            if ch(t) == 1 % si le participants a choisi B
+            if ch(t) == 1 % si le participant a choisi B
                 lik(t) = 1 - PA(t);
-            elseif ch(t) == 2 % si le particiapnts a choisi A
+            elseif ch(t) == 2 % si le participant a choisi A
                 lik(t) = PA(t);
             end
 
@@ -76,8 +76,8 @@ for a = 1:size(alpha_mat,2)
 
         end
 
-        % calculer à quel point les choix du participants étaient probables
-        % avec ces parametres du modèle
+        % calculer à quel point les choix du participant étaient probables
+        % avec ces paramètres du modèle
         nLL(a,b) = -sum(log(lik(:)));
 
 

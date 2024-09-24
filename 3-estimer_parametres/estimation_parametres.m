@@ -23,8 +23,8 @@ sim_inv_temp = 1.5;
 
 % Test avec une fonction d'optimisation
 x0 = [3 0.1]; % point initial : la première valeur correspond à la température, la deuxième valeur correspond à alpha
-xmin = [0 0]; % valeurs minimales pour chaque paramètre : la première valeur correspond à la température, la deuxième valeur correspond à alpha
-xmax = [5 1]; % valeurs maximales pour chaque paramètre : la première valeur correspond à la température, la deuxième valeur correspond à alpha
+xmin = [0 0]; % valeurs minimales : la première valeur correspond à la température, la deuxième valeur correspond à alpha
+xmax = [5 1]; % valeurs maximales : la première valeur correspond à la température, la deuxième valeur correspond à alpha
 
 % On définit les options de la fonction d'optimisation 
 options = optimset('Algorithm', 'interior-point', 'Display', 'iter-detailed', 'MaxIter', 10000); % Ces valeurs augmentent le nombre d'itérations pour s'assurer d'avoir une convergence

@@ -37,12 +37,12 @@ for t = 1:ntrials
     % participant
     if ch(t) == 1 % si le participant a choisi B
         lik(t) = 1 - PA(t);
-    elseif ch(t) == 2 % si le particiapnt a choisi A
+    elseif ch(t) == 2 % si le participant a choisi A
         lik(t) = PA(t);
     end
 
     % calculer l'erreur de prédiction sur la base de la récompense
-    % délivré au participant (r)
+    % délivrée au participant (r)
     PE(t) = r(t) - Qt(t,ch(t));
 
     % mise à jour de la valeur
