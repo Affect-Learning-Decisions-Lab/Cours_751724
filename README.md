@@ -4,4 +4,4 @@ Dans ce dossier, vous pouvez trouver le code avec les exercices qui accompagnent
 
 
 ## Acknowledgment 
-Le code de ce cours est largement basé sur le code du dr Mael Lebreton (chapitre 2-6) et le dr Yoann Stussi (1-2)
+Le code de ce cours est largement basé sur le code du dr Mael Lebreton (chapitre 2-6) et du dr Yoann Stussi (1-2)
