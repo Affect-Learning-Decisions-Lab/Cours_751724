@@ -1,4 +1,4 @@
-function [ch_all, r_all] = Qmodel (alpha, inv_temp, ntrials, nruns)
+function [ch_all, r_all] = Qmodel_dual (alphaE, alphaI, inv_temp, ntrials, nruns)
 
 
 
@@ -35,11 +35,19 @@ for krun = 1:nruns
         r(t,krun) = O(t,ch(t,krun));
 
         % 4 calculer l'erreur de prédiction
-        PE(t,krun) = r(t,krun) - Qt(t,ch(t,krun),krun);
 
-        % 5 mise à jour de la valeur
-        Qt(t+1,ch(t,krun),krun) = Qt(t,ch(t,krun),krun) + alpha.*PE(t,krun);    % colonne ch(t) = choisie (1 ou 2)
-        Qt(t+1,3-ch(t,krun),krun) = Qt(t,3-ch(t,krun),krun);                    % colonne 3-ch(t) = non choisie (2 ou 1)
+        dv         = r(t,krun) - Qt(t,ch(t,krun),krun);
+        PE(t,krun) = dv;
+
+        % 5 mise à jour de la valeur RW dual learning
+
+        if dv > 0 % si l'erreur de prédiction est positive
+            Qt(t+1,ch(t,krun),krun) = Qt(t,ch(t,krun),krun) + alphaE.*dv;    % colonne ch(t) = choisie (1 ou 2)
+            Qt(t+1,3-ch(t,krun),krun) = Qt(t,3-ch(t,krun),krun); % colonne 3-ch(t) = non choisie (2 ou 1)
+        else % si l'erreur de prédiction est négative
+            Qt(t+1,ch(t,krun),krun) = Qt(t,ch(t,krun),krun) + alphaI.*dv;    % colonne ch(t) = choisie (1 ou 2)
+            Qt(t+1,3-ch(t,krun),krun) = Qt(t,3-ch(t,krun),krun); % colonne 3-ch(t) = non choisie (2 ou 1)
+        end
 
     end
 

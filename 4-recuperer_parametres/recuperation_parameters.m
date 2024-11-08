@@ -1,3 +1,7 @@
+%--------------------------------------------------------------------------
+% Recuperer les paramètres
+% -------------------------------------------------------------------------
+
 
 %% add our tools
 here = pwd;
@@ -7,8 +11,7 @@ addpath(genpath(fullfile(here,'my_functions')));
 %% input variables
 
 nsub    = 300; % number of participants (or subjects, sub)
-
-ntrials =  100; % number of trials
+ntrials = 100; % number of trials
 nruns   =  50; % number of runs
 
 %% initialise parameters
@@ -16,39 +19,34 @@ nruns   =  50; % number of runs
 simulated_param = nan(nsub,2);
 recovered_param = nan(nsub,2);
 
-
 %% initialise the distribution from which we will sample the free parameters
-
 
 % number of initial point from which the search starts
 nstarts = 5 ;
 
-xmin    = [0 0]; % min values of each parameter
-xmax    = [10 1]; % max value of each parameter
+% min and max of the two parametres
+xmin    = [0 0]; 
+xmax    = [10 1]; 
 
 % we define the options of the optimization function
 options = optimset('Algorithm', 'interior-point', 'Display', 'iter-detailed', 'MaxIter', 10000, 'Display','off'); % These increase the number of iterations to ensure the convergence
 warning off all
 
-
-
-pd = makedist('Gamma',3.5,1);   % Define the distribution object    
+% Define the distribution object 
+pd = makedist('Gamma',3.5,1);      
 pdt = truncate(pd,xmin(1),xmax(1)) ;
+
+%% start procedure
 
 for ksub = 1:nsub
 
-
     disp (['-------  synthetic participant  ' num2str(ksub) '   -------']);
 
-
-    % sample a set of free parameters from the distribution for the current
-    % participant
-
+    % sample a set of free parameters from the distribution 
     sim_param(ksub).alpha     = random('Beta', 2.2, 2.2);
     sim_param(ksub).inv_temp  = random(pdt);
 
     % save the sampled paramaeters
-
     simulated_param(ksub,:) = [sim_param(ksub).inv_temp,sim_param(ksub).alpha];
 
     % simulate synthetic participant behavior
@@ -57,20 +55,16 @@ for ksub = 1:nsub
     % estimate free parameters
 
     % we try multiple starting point not to get stack in local minima
-
     nll = nan(nstarts,1);
     for strt = 1:nstarts
 
-         
         x0 = unifrnd(xmin,xmax);
     
-
         [rec_param(strt,:),nll(strt),~,~,~] = fmincon(@(x) estimateQ(x,sim_ch,sim_r, nruns),x0,[],[],[],[],xmin,xmax,[],options);
-
 
     end
 
-    % trouver le min loglike avec les different paramentres
+    % trouver le min neg loglik avec les differentes parametres
     minnLL = find(min(nll));
 
     recovered_param(ksub,:) = rec_param (minnLL,:);
@@ -92,7 +86,6 @@ figure
 subplot(2, 2, 1) 
 
 hold on
-
    
 xl = [0 10];
 
@@ -101,7 +94,6 @@ ylabel(strcat('Estimated \beta'));
 
 X = simulated_param(:, 1);
 Y = recovered_param(:, 1);
-
 
 % plot line r = 1
 plot( xl, xl, ':k', 'LineWidth', 2); 
@@ -134,9 +126,6 @@ set(gca,'YLim', [0 1], ...
         'FontSize', 12, ...
         'FontName', 'Arial')
 
-
-
-
 %--------------------------------------------------------------------------
 % pannel 1 : alpha estimates
 
@@ -145,10 +134,8 @@ subplot(2, 2, 3)
 
 hold on
 
-
 xlabel(strcat('Simulated \alpha'));
 ylabel(strcat('Estimated \alpha'));
-
 
 X = simulated_param(:, 2);
 Y = recovered_param(:, 2);
@@ -184,5 +171,3 @@ set(gca,'YLim', [0 1], ...
         'XTickLabel', {'\beta_0','\beta_1'}, ...
         'FontSize', 12, ...
         'FontName', 'Arial')
-
-

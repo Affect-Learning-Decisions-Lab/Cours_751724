@@ -20,7 +20,7 @@ for krun = 1:nruns
     O = [RB, RA];
 
 
-    Qt(1,:,krun)  = Q0;  % initialiser les valeurs Q
+    Qt(1,:,krun)  = Q0;           % initialiser les valeurs Q
 
     % simulations valeur
     for t = 1:ntrials
@@ -39,7 +39,7 @@ for krun = 1:nruns
 
         % 5 mise à jour de la valeur
         Qt(t+1,ch(t,krun),krun) = Qt(t,ch(t,krun),krun) + alpha.*PE(t,krun);    % colonne ch(t) = choisie (1 ou 2)
-        Qt(t+1,3-ch(t,krun),krun) = Qt(t,3-ch(t,krun),krun);                    % colonne 3-ch(t) = non choisie (2 ou 1)
+        Qt(t+1,3-ch(t,krun),krun) = Qt(t,3-ch(t,krun),krun);                     % colonne 3-ch(t) = non choisie (2 ou 1)
 
     end
 
