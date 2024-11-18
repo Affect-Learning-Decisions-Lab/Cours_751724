@@ -1,6 +1,5 @@
 function bms_results = mf_bms_bic(rec_data)
     
-
     % Bayesian model selection for group studies based on bic
     % uses bms.m of sam gersham
     

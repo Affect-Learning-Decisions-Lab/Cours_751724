@@ -1,4 +1,4 @@
-function [] = plotModelRec(data_path, models, files_id)
+function [] = mf_plotModelRec(data_path, models, files_id)
 
 
 
@@ -52,7 +52,7 @@ n_goodcl_bic = squeeze(sum(bm_bic, 3));
 
 
 
-%% Figure 1 confusion matrixes
+%% Figure confusion matrixes
 
 
 h1 = figure('Units', 'pixels',...

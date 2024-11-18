@@ -40,21 +40,21 @@ param(1).ub      = 10;   % upper bound
 % learning rate
 b                = [2.2, 2.2]; % parameters of beta prior
 param(2).name    = 'learning rate';
-param(2).logpdf  = @(x) sum(log(betapdf(x, b(1), b(2)))); % log density function for prior
+param(2).logpdf  = @(x) sum(log(betapdf(x, b(1), b(2)))); 
 param(2).lb      = 0;
 param(2).ub      = 1;
 
 % excitatory learning rate
 b                = [2.2, 2.2]; % parameters of beta prior
 param(3).name    = 'excitatory learning rate';
-param(3).logpdf  = @(x) sum(log(betapdf(x, b(1), b(2)))); % log density function for prior
+param(3).logpdf  = @(x) sum(log(betapdf(x, b(1), b(2)))); 
 param(3).lb      = 0;
 param(3).ub      = 1;
 
 % inhibitory learning rate 
 b                = [2.2, 2.2]; % parameters of beta prior
 param(4).name    = 'inhibitory learning rate';
-param(4).logpdf  = @(x) sum(log(betapdf(x, b(1), b(2)))); % log density function for prior
+param(4).logpdf  = @(x) sum(log(betapdf(x, b(1), b(2)))); 
 param(4).lb      = 0;
 param(4).ub      = 1;
 
@@ -155,7 +155,7 @@ for k_it = 1:n_it % for each iteration
         end
 
         % perform bayesian model selection 
-        bms_results.bic(ksim) = mfit_bms_bic(databms);
+        bms_results.bic(ksim) = mf_bms_bic(databms);
 
     end
 
@@ -174,4 +174,4 @@ end
 %% 5. Plot data
 data_path = fullfile(here,'my_recoveries');
 
-plotModelRec(data_path, models, 'Sim_*')
+mf_plotModelRec(data_path, models, 'Sim_*')
