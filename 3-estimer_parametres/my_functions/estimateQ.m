@@ -1,9 +1,9 @@
-function [nLL] = estimateQ(params, ch, r, nruns)
+function [nLL] = estimateQ(param, ch, r, nruns)
 
 
 % récupérer les paramètres que nous allons utiliser pour la simulation
-inv_temp = params(1);
-alpha = params(2);
+inv_temp = param(1);
+alpha = param(2);
 
 % récupérer les caractéristiques de la tâche
 ntrials = size(ch,1); % récupérer les choix du participant

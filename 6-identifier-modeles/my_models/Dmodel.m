@@ -1,4 +1,4 @@
-function [ch_all, r_all] = Qmodel_dual (alphaE, alphaI, inv_temp, ntrials, nruns)
+function [ch_all, r_all] = Dmodel (alphaE, alphaI, inv_temp, ntrials, nruns)
 
 
 

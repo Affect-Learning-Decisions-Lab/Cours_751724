@@ -10,16 +10,10 @@ addpath(genpath(fullfile(here,'my_functions')));
 
 %% input variables
 
-nsub    = 300; % number of participants (or subjects, sub)
+nsub    = 100; % number of participants (or subjects, sub)
 ntrials = 100; % number of trials
 nruns   =  50; % number of runs
-n_it    =  30;  % number of recovery iteration
-N_init  =  10;  % number of free parameter initialisation
-
-%% initialise parameters
-
-simulated_param = nan(2,3,nsub);
-recovered_param = nan(2,3,nsub);
+n_it    =  30; % number of recovery iteration
 
 %% initialise the distribution from which we will sample the free parameters
 
@@ -30,87 +24,154 @@ nstarts = 5 ;
 xmin    = [ 0 0 0 0];
 xmax    = [10 1 1 1];
 
-% we define the options of the optimization function
-options = optimset('Algorithm', 'interior-point', 'Display', 'iter-detailed', 'MaxIter', 10000, 'Display','off'); % These increase the number of iterations to ensure the convergence
-warning off all
-
 % Define the distribution object
 pd = makedist('Gamma',3.5,1);
 pdt = truncate(pd,xmin(1),xmax(1)) ;
+
+%% define parameters
+
+% inverse temperature
+g                = [2 1]; % parameters of the gamma prior
+param(1).name    = 'inverse temperature';
+param(1).logpdf  = @(x) sum(log(gampdf(x, g(1), g(2))));  % log density function for prior
+param(1).lb      = 0;    % lower bound
+param(1).ub      = 10;   % upper bound
+
+% learning rate
+b                = [2.2, 2.2]; % parameters of beta prior
+param(2).name    = 'learning rate';
+param(2).logpdf  = @(x) sum(log(betapdf(x, b(1), b(2)))); % log density function for prior
+param(2).lb      = 0;
+param(2).ub      = 1;
+
+% excitatory learning rate
+b                = [2.2, 2.2]; % parameters of beta prior
+param(3).name    = 'excitatory learning rate';
+param(3).logpdf  = @(x) sum(log(betapdf(x, b(1), b(2)))); % log density function for prior
+param(3).lb      = 0;
+param(3).ub      = 1;
+
+% inhibitory learning rate 
+b                = [2.2, 2.2]; % parameters of beta prior
+param(4).name    = 'inhibitory learning rate';
+param(4).logpdf  = @(x) sum(log(betapdf(x, b(1), b(2)))); % log density function for prior
+param(4).lb      = 0;
+param(4).ub      = 1;
+
+% models to fit  
+models     = {'Q','D'}; % Q : q learning single learning rate; D : dual learning rate
+nmodels    = [  1, 2 ];
 
 %% start procedure
 
 for k_it = 1:n_it % for each iteration
 
-    % display current interation
     disp (['--------------   interation number ' num2str(k_it) ' ---------------------------', newline, '', newline, '']);
 
     for ksub = 1:nsub % for each simulated participant
 
-        % display current participant
         disp (['************ synthetic participant number ' num2str(ksub) ' *************', newline, ' ', newline, ' ']);
 
         %% 1. Simulate behavior with the two models
-        
+
         %------------------------------------------------------------------
         % sample free parameters
 
-        % sample a set of free parameters from the distribution 
+        % sample a set of free parameters from the distribution
         sim_param(ksub).alpha    = random('Beta', 2.2, 2.2);
         sim_param(ksub).alphaE   = random('Beta', 2.2, 2.2);
         sim_param(ksub).alphaI   = random('Beta', 2.2, 2.2);
         sim_param(ksub).inv_temp = random(pdt);
 
-        % save the sampled paramaeters
-        simulated_param(:,:,ksub) = [sim_param(ksub).inv_temp,sim_param(ksub).alpha, 0;
-            sim_param(ksub).inv_temp, sim_param(ksub).alphaE, sim_param(ksub).alphaI];
-
         %------------------------------------------------------------------
         % simulate behavior with Q model
-        [Q.sim_ch, Q.sim_r] = Qmodel(sim_param(ksub).alpha, sim_param(ksub).inv_temp, ntrials, nruns);
-
+        [Q.ch, Q.r] = Qmodel(sim_param(ksub).alpha, sim_param(ksub).inv_temp, ntrials, nruns);
+         Q.nruns = nruns;    
+            
         %------------------------------------------------------------------
         % simulate behavior with dual learning model
-        [D.sim_ch, D.sim_r] = Qmodel_dual(sim_param(ksub).alphaE, sim_param(ksub).alphaI, sim_param(ksub).inv_temp, ntrials, nruns);
-
-        models_sim = {Q, D};
-        models     = {'Q','D'};
-        %% 2. Fit the behavior 
+        [D.ch, D.r] = Dmodel(sim_param(ksub).alphaE, sim_param(ksub).alphaI, sim_param(ksub).inv_temp, ntrials, nruns);
+         D.nruns = nruns;    
+        
+        % save output
+        models_sim = { Q , D };
+        
+        %% 2. Fit the behavior
 
         % the idea here is to fit the choices simulated with the two model
-        % retrive the best parameters and see what is the best logliklihood 
+        % retrive the best parameters and see what is the best logliklihood
         % of the model. If the procedure works well the best likelihood of
         % the model that generated the choices should be better than the
         % best likelihood of the model that did not.
 
-        for m = 1:length(models)
+        for simd = 1:length(models)
 
-            mdl_data = char(models(m));
-            
-            disp ('******************************************************************************') 
+            mdl_data = char(models(simd));
 
-            disp (['*************** Using simulated data from ' mdl_data ' ***********************'])
-
-            disp (['******************************************************************************', newline, '']) 
-
+            disp ('-------------- -------------- -------------- -------------- ')
+            disp (['--------------   Using simulated data from ' mdl_data ' --------------'])
 
             % ----------------------------------------------------------------------
             disp ([' fitting model:  Q',   newline, ''])
 
+            % fit Q model
+            data  = models_sim{simd};
+            Qfit  = mf_optimize (@estimateQ, data, param([1 2]), nstarts);
 
+            % save output for bayesian model comparison
+            recovered(simd).Q.K                = Qfit.K;
+            recovered(simd).Q.logpost(ksub)    = Qfit.logp;
+            recovered(simd).Q.loglik(ksub)     = Qfit.loglik;
+            recovered(simd).Q.bic(ksub)        = Qfit.bic;
+            recovered(simd).Q.aic(ksub)        = Qfit.aic;
+            recovered(simd).Q.H{ksub}          = Qfit.H;
 
             % ----------------------------------------------------------------------
             disp ([' fitting model:  Dual', newline, ''])
 
+            % fit Dual model
+            data  = models_sim{simd};
+            Dfit  = mf_optimize (@estimateD, data, param([1 3 4]), nstarts);
 
+            % save output for bayesian model comparison
+            recovered(simd).D.K                = Dfit.K;
+            recovered(simd).D.logpost(ksub)    = Dfit.logp;
+            recovered(simd).D.loglik(ksub)     = Dfit.loglik;
+            recovered(simd).D.bic(ksub)        = Dfit.bic;
+            recovered(simd).D.H{ksub}          = Dfit.H;
 
+        end % end each data simulation from each model
+
+    end % end participant
+
+    %% 3. do the model recovery
+    for ksim = 1:length(nmodels)
+
+        % format data
+        for i = 1:length(fieldnames(recovered(ksim)))
+            names         = fieldnames(recovered(ksim));
+            name          = char(cellstr(names(i)));
+            databms(i)    = recovered(ksim).(name); 
         end
 
-        
-
+        % perform bayesian model selection 
+        bms_results.bic(ksim) = mfit_bms_bic(databms);
 
     end
 
+    %% 4. save simulation data 
+    xt         = datetime;
+    add_rnd    = round(100 * rand());
+    flnm       = strcat('Sim_', datestr(xt, 'yyyymmddTHHMMSS'), '_', num2str(add_rnd), '.mat');
+
+    disp(datetime)
+
+    full_flnm  = fullfile(here,'my_recoveries',flnm);
+    save(full_flnm, 'bms_results')
 
 end
 
+%% 5. Plot data
+data_path = fullfile(here,'my_recoveries');
+
+plotModelRec(data_path, models, 'Sim_*')
