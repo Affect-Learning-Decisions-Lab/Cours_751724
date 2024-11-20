@@ -15,14 +15,14 @@ sim_inv_temp = 1.5;
 [sim_ch, sim_r] = Qmodel(sim_alpha, sim_inv_temp, ntrials, nruns);
 
 
-%% Ensuite, nous procedons avec le processus d'estimation des paramètres sur le comportement 
+%% Méthode 1: Grid Search
 
-% grid search
 [est_alpha, est_temp] = estimateQ_gridsearch(sim_ch, sim_r, nruns);
 
 
-% fonction d'optimisation
-x0   = [ 3 0.1]; % point initial : la première valeur correspond à la température, la deuxième valeur correspond à alpha
+%% Méthode 2: Optimisation avec vraisamblance
+
+x0   = [ 3 0.1];   % point initial : la première valeur correspond à la température, la deuxième valeur correspond à alpha
 xmin = [ 0 0  ];   % valeurs minimales : la première valeur correspond à la température, la deuxième valeur correspond à alpha
 xmax = [10 1  ];   % valeurs maximales : la première valeur correspond à la température, la deuxième valeur correspond à alpha
 
@@ -31,35 +31,30 @@ options = optimset('Algorithm', 'interior-point', 'Display', 'iter-detailed', 'M
 
 [parameters,nll,~,~,~]       = fmincon(@(x) estimateQ(x,sim_ch,sim_r, nruns),x0,[],[],[],[],xmin,xmax,[],options);
 
-%% Utiliser la fonction d'optimisation en rajoutant
-% 1. the optimisation process using the priors
-% 2. Extraiant plusieurs index d'ajustement du modèle
+%% Méthode 3: Optimisation avec log posterior
 
-% inverse temperature 
+% temperature inverse
 g                = [3.5 1]; % parameters of the gamma prior
 param(1).name    = 'inverse temperature';
 param(1).logpdf  = @(x) sum(log(gampdf(x, g(1), g(2))));  % log density function for prior
-param(1).lb      = 0;   % lower bound
-param(1).ub      = 5;   % upper bound
+param(1).lb      = 0;   % limite inférieure
+param(1).ub      = 5;   % limite supérieure
 
-% learning rate 
-b                = [2.5, 2.5]; % parameters of beta prior
+% taux d'apprentissage 
+b                = [2.5, 2.5]; % hyper parameters of beta prior
 param(2).name    = 'learning rate';
 param(2).logpdf  = @(x) sum(log(betapdf(x, b(1), b(2)))); % log density function for prior
 param(2).lb      = 0;
 param(2).ub      = 1;
 
-% define the input to use the function
-nstarts    = 3;       % we want to have several starting points of our search
+% number de fois ou on comment
+nstarts          = 3;       
 
-% just put the data of the task and behavior in the same data structure
-data.ch    = sim_ch;  
-data.r     = sim_r;
-data.nruns = nruns;
+% mettre les données dans une structure
+data.ch          = sim_ch;  
+data.r           = sim_r;
+data.nruns       = nruns;
 
-
-% Obtain the estimates with the optimization function
-recovered  = mf_optimize(@estimateQ, data, param, nstarts);
-
+% executer la function qui combine fmincon avec les priors
+recovered        = mf_optimize(@estimateQ, data, param, nstarts);
 recovered.param
-
