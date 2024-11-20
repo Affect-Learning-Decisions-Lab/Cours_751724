@@ -22,9 +22,9 @@ sim_inv_temp = 1.5;
 
 
 % fonction d'optimisation
-x0   = [ 3 0.1]; % point initial : la première valeur correspond à la température, la deuxième valeur correspond à alpha
-xmin = [ 0 0  ];   % valeurs minimales : la première valeur correspond à la température, la deuxième valeur correspond à alpha
-xmax = [10 1  ];   % valeurs maximales : la première valeur correspond à la température, la deuxième valeur correspond à alpha
+x0   = [3 0.1]; % point initial : la première valeur correspond à la température, la deuxième valeur correspond à alpha
+xmin = [0 0];   % valeurs minimales : la première valeur correspond à la température, la deuxième valeur correspond à alpha
+xmax = [10 1];   % valeurs maximales : la première valeur correspond à la température, la deuxième valeur correspond à alpha
 
 % On définit les options de la fonction d'optimisation 
 options = optimset('Algorithm', 'interior-point', 'Display', 'iter-detailed', 'MaxIter', 10000); % Ces valeurs augmentent le nombre d'itérations pour s'assurer d'avoir une convergence
@@ -32,7 +32,7 @@ options = optimset('Algorithm', 'interior-point', 'Display', 'iter-detailed', 'M
 [parameters,nll,~,~,~]       = fmincon(@(x) estimateQ(x,sim_ch,sim_r, nruns),x0,[],[],[],[],xmin,xmax,[],options);
 
 %% Utiliser la fonction d'optimisation en rajoutant
-% 1. the optimisation process using the priors
+% 1. some prior information about the paramter distrubution
 % 2. Extraiant plusieurs index d'ajustement du modèle
 
 % inverse temperature 

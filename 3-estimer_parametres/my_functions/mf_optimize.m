@@ -1,4 +1,7 @@
-function estimate = model_fit_optimize (likfun, data,param, nstarts)
+function estimate = mf_optimize (likfun, data,param, nstarts)
+
+
+
 
 %------------------------------ prepare -----------------------------------
 
@@ -20,15 +23,15 @@ xmin = [param.lb];
 xmax = [param.ub];
 
 % contruct the posterior function
-f = @(x) -nll2nlogp(x,param,likfun,ch,r,nruns);
+f = @(x) -mf_nll2nlogp(x,param,likfun,ch,r,nruns);
 
 %------------------------------ execute -----------------------------------
 
 
 % initialize
 nlogp     = nan(nstarts,1);
-h         = nan(2,2,nstarts);
-rec_param = nan (nstarts, 2);
+h         = nan(K,K,nstarts);
+rec_param = nan (nstarts, K);
 
 for strt = 1:nstarts
 
@@ -52,7 +55,8 @@ nll              = likfun(estimate.param, ch, r, nruns);
 estimate.loglik  = -nll;
 
 % logp
-estimate.logp    = -nlogp;
+nlogpost         = nlogp(minnLLp);
+estimate.logp    = -nlogpost;
 
 % hessian
 estimate.H       = h(:,:,minnLLp);

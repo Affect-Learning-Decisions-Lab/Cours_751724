@@ -15,19 +15,6 @@ ntrials = 100; % number of trials
 nruns   =  50; % number of runs
 n_it    =  30; % number of recovery iteration
 
-%% initialise the distribution from which we will sample the free parameters
-
-% number of initial point from which the search starts
-nstarts = 5 ;
-
-% min and max of the two parametres
-xmin    = [ 0 0 0 0];
-xmax    = [10 1 1 1];
-
-% Define the distribution object
-pd = makedist('Gamma',3.5,1);
-pdt = truncate(pd,xmin(1),xmax(1)) ;
-
 %% define parameters
 
 % inverse temperature
@@ -61,6 +48,16 @@ param(4).ub      = 1;
 % models to fit  
 models     = {'Q','D'}; % Q : q learning single learning rate; D : dual learning rate
 nmodels    = [  1, 2 ];
+
+
+%% define the distribution from which we will sample the free parameters
+
+% number of initial point from which the search starts
+nstarts = 5 ;
+
+% Define the distribution object for the sampling of the inverse temp
+pd = makedist('Gamma',3.5,1);
+pdt = truncate(pd,param(1).lb,param(1).ub) ;
 
 %% start procedure
 
